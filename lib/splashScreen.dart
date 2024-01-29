@@ -227,7 +227,6 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
 
   void _toggleHighlight(int row, int col) {
     setState(() {
-      // Toggle the color of the tapped cell
       styledGrid[row][col] = TextSpan(
         text: widget.grid[row][col],
         style: TextStyle(color: Colors.red),
@@ -291,10 +290,7 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
 
   void _highlightWord(String word, int row, int col) {
     for (int i = 0; i < word.length; i++) {
-      styledGrid[row][col + i] = TextSpan(
-        text: word[i],
-        style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
-      );
+      _toggleHighlight(row, col + i);
     }
   }
 }
