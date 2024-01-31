@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -7,8 +8,8 @@ class SplashScreen extends StatelessWidget {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-                'assets/bgsplash.jpg'), // Replace with your image asset
+            image:
+                AssetImage('assets/sppp.jpg'), // Replace with your image asset
             fit: BoxFit.cover,
           ),
         ),
@@ -16,12 +17,16 @@ class SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'WELCOME !!!',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 60,
-                    fontWeight: FontWeight.bold),
+              DefaultTextStyle(
+                style: const TextStyle(
+                  fontSize: 25.0,
+                ),
+                child: AnimatedTextKit(
+                  animatedTexts: [
+                    WavyAnimatedText('Design first, then code'),
+                  ],
+                  isRepeatingAnimation: true,
+                ),
               ),
               const SizedBox(
                 height: 20,
@@ -148,7 +153,6 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
   }
 
   void initializeStyledGrid() {
-    // Initialize the styledGrid with the same dimensions as the original grid
     styledGrid = List.generate(
       widget.grid.length,
       (i) => List.generate(
@@ -229,7 +233,7 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
     setState(() {
       styledGrid[row][col] = TextSpan(
         text: widget.grid[row][col],
-        style: TextStyle(color: Colors.red),
+        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
       );
     });
   }
@@ -240,6 +244,7 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
     _searchWordInGrid(textToSearch);
   }
 
+//functions for searching the word
   void _searchWordInGrid(String word) {
     int row = widget.grid.length;
     int col = widget.grid[0].length;
@@ -256,8 +261,14 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
     for (int i = 0; i < row; i++) {
       for (int j = 0; j < col; j++) {
         if (grid[i][j] == word[ind]) {
-          if (_search(grid, word, i, j, ind, row, col)) {
-            _highlightWord(word, i, j);
+          if (_searchRight(grid, word, i, j, ind, row, col)) {
+            _highlightWord(word, i, j, "R");
+            return true;
+          } else if (_searchBottom(grid, word, i, j, ind, row, col)) {
+            _highlightWord(word, i, j, "B");
+            return true;
+          } else if (_searchDiag(grid, word, i, j, ind, row, col)) {
+            _highlightWord(word, i, j, "D");
             return true;
           }
         }
@@ -266,31 +277,44 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
     return false;
   }
 
-  bool _search(List<List<String>> grid, String word, int i, int j, int ind,
+  bool _searchRight(List<List<String>> grid, String word, int i, int j, int ind,
       int row, int col) {
-    if (ind == word.length) return true;
-    if (i < 0 ||
-        j < 0 ||
-        i == row ||
-        j == col ||
-        grid[i][j] != word[ind] ||
-        grid[i][j] == '!') return false;
-    String c = grid[i][j];
-    grid[i][j] = "!";
-    bool top = _search(grid, word, i - 1, j, ind + 1, row, col);
-    bool right = _search(grid, word, i, j + 1, ind + 1, row, col);
-    bool bottom = _search(grid, word, i + 1, j, ind + 1, row, col);
-    bool left = _search(grid, word, i, j - 1, ind + 1, row, col);
-    bool diagonal = _search(grid, word, i + 1, j + 1, ind, row, col);
-
-    grid[i][j] = c;
-
-    return top || bottom || right || left || diagonal;
+    for (int k = j; k < col && ind < word.length; k++) {
+      if (grid[i][k] == word[ind]) {
+        ind++;
+      } else
+        break;
+    }
+    return ind == word.length;
   }
 
-  void _highlightWord(String word, int row, int col) {
+  bool _searchBottom(List<List<String>> grid, String word, int i, int j,
+      int ind, int row, int col) {
+    for (int k = i; k < row && ind < word.length; k++) {
+      if (grid[k][j] == word[ind]) {
+        ind++;
+      } else
+        break;
+    }
+    return ind == word.length;
+  }
+
+  bool _searchDiag(List<List<String>> grid, String word, int i, int j, int ind,
+      int row, int col) {
+    for (int k = i; k < row && k < col; k++) {
+      if (grid[k][k] == word[ind]) ind++;
+    }
+    return ind == word.length;
+  }
+
+  //function for highlighting the searched word
+  void _highlightWord(String word, int row, int col, String dir) {
     for (int i = 0; i < word.length; i++) {
-      _toggleHighlight(row, col + i);
+      if (dir == "R")
+        _toggleHighlight(row, col + i);
+      else if (dir == "B")
+        _toggleHighlight(row + i, col);
+      else if (dir == "D") _toggleHighlight(row + i, col + i);
     }
   }
 }
